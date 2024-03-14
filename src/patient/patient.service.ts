@@ -1,4 +1,8 @@
-import { Injectable, InternalServerErrorException } from "@nestjs/common";
+import {
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import {
   AppointmentEntity,
@@ -11,11 +15,19 @@ import {
   SessionEntity,
   UserEntity,
 } from "./patient.entity";
-import { Repository } from "typeorm";
+import { MoreThanOrEqual, Repository } from "typeorm";
 // import { MailerService } from "@nestjs-modules/mailer";
-import { LoginDTO, Patient_ProfileDTO, PatientDTO } from "./patient.dto";
+import {
+  AppointmentDTO,
+  BillingDTO,
+  FeedbackDTO,
+  LoginDTO,
+  Patient_ProfileDTO,
+  PatientDTO,
+} from "./patient.dto";
 import { MapperService } from "./mapper.service";
 import { JwtService } from "@nestjs/jwt";
+import { Request } from "express";
 
 @Injectable()
 export class PatientService {
@@ -187,49 +199,183 @@ export class PatientService {
     }
   }
 
-  async Create_an_Appointment(): Promise<any> {
-    return true;
+  async Create_an_Appointment(
+    email: string,
+    appointment_data: AppointmentDTO,
+  ): Promise<any> {
+    const user = await this.userRepository.findOneBy({
+      email: email,
+    });
+    const appointment_entity = this.mapperService.dtoToEntity(
+      appointment_data,
+      AppointmentEntity,
+    );
+    appointment_entity.status = "Pending";
+    appointment_entity.patient = user;
+
+    const saved_appointment =
+      await this.appointmentRepository.save(appointment_entity);
+    return saved_appointment ? saved_appointment.id : -1;
   }
 
-  async Get_Single_Appointment(): Promise<any> {
-    return { data: "12/3/2024" };
+  async Get_Single_Appointment(email: string): Promise<any> {
+    // const user = await this.userRepository.findOneBy({
+    //   email: email,
+    // });
+
+    // Get the current date
+    const currentDate = new Date();
+
+    // Extract day, month, and year from the current date
+    const currentDay = currentDate.getDate();
+    const currentMonth = currentDate.getMonth() + 1; // Months are zero-indexed
+    const currentYear = currentDate.getFullYear();
+
+    // Format the current date in DD/MM/YYYY format
+    const formattedCurrentDate = `${currentDay}/${currentMonth}/${currentYear}`;
+
+    // Query the database for the upcoming appointment
+    const upcomingAppointment = await this.appointmentRepository.findOne({
+      where: {
+        appointment_date: MoreThanOrEqual(formattedCurrentDate),
+        patient: { email: email },
+      },
+      order: {
+        appointment_date: "ASC", // Get the earliest upcoming appointment
+      },
+    });
+
+    return upcomingAppointment ? upcomingAppointment : null;
   }
 
-  async Update_Appointment_Details(): Promise<any> {
-    return { data: "18/3/2024" };
+  async Update_Appointment_Details(updated_data: AppointmentDTO): Promise<any> {
+    try {
+      const previous_data = await this.appointmentRepository.findOneBy({
+        id: updated_data.id,
+      });
+
+      //  If Date got updated
+      if (
+        updated_data.appointment_date != previous_data.appointment_date &&
+        updated_data.appointment_date != null &&
+        updated_data.appointment_date != ""
+      ) {
+        await this.appointmentRepository.update(previous_data.id, {
+          appointment_date: updated_data.appointment_date,
+        });
+      }
+
+      //   If Time Got updated
+      if (
+        updated_data.appointment_time != previous_data.appointment_time &&
+        updated_data.appointment_time != null &&
+        updated_data.appointment_time != ""
+      ) {
+        await this.appointmentRepository.update(previous_data.id, {
+          appointment_time: updated_data.appointment_time,
+        });
+      }
+      return updated_data;
+    } catch (e) {
+      return new InternalServerErrorException(e.message);
+    }
   }
 
-  async Get_All_Medical_Lab_Record_List(): Promise<any> {
-    return { data: "Normal" };
+  async Delete_Appointment(id: number): Promise<any> {
+    return await this.appointmentRepository.delete(id);
   }
 
-  async Update_Single_Medical_Lab_Record(): Promise<any> {
-    return { data: "Medicines needed" };
+  async Get_All_Medical_Lab_Record_List(
+    email: string,
+  ): Promise<MedicalLabRecordEntity[]> {
+    const user = await this.userRepository.findOneBy({ email: email });
+    return this.medicalLabRecordRepository.findBy({ user: user });
+  }
+
+  async Get_Single_Medical_Record(id: number): Promise<MedicalLabRecordEntity> {
+    try {
+      const medical_report = await this.medicalLabRecordRepository.findOneBy({
+        id: id,
+      });
+
+      if (medical_report != null) {
+        return medical_report;
+      } else {
+        throw new NotFoundException("Data Not Found");
+      }
+    } catch (e) {
+      throw new InternalServerErrorException(e.message);
+    }
   }
 
   // Not Needed, Handled from Controller
-  async Create_Profile_Picture(): Promise<any> {
-    return true;
+  async Update_Profile_Picture(
+    email: string,
+    image: string,
+  ): Promise<Patient_ProfileDTO> {
+    const current_user = await this.userRepository.findOneBy({ email: email });
+    const current_patient = await this.patientRepository.findOneBy({
+      user: current_user,
+    });
+
+    if (current_patient) {
+      (await current_patient).image = image;
+      await this.patientRepository.update((await current_patient).id, {
+        image: image,
+      });
+    }
+
+    return await this.Find_Patient_By_Email(email);
   }
 
   // Not Needed, Handled from Controller
-  async Get_Profile_Picture(): Promise<any> {
-    return { data: "test.jpg" };
+  async Get_Profile_Picture(email: string, res: any): Promise<any> {
+    const current_user = await this.userRepository.findOneBy({ email: email });
+    const current_patient = await this.patientRepository.findOneBy({
+      user: current_user,
+    });
+    // console.log("Current seller Image Getting = "+(await current_seller).Profile_Picture) // Working
+    if (current_patient) {
+      res.sendFile((await current_patient).image, {
+        root: "./assets/profile_images",
+      });
+    } else {
+      throw new NotFoundException("Patient data not found");
+    }
   }
 
-  async Create_Billing_Payment(): Promise<any> {
-    return true;
+  async Create_Billing_Payment(
+    email: string,
+    billing: BillingDTO,
+  ): Promise<any> {
+    const user = await this.userRepository.findOneBy({ email: email });
+    const billEntitiy = await this.mapperService.dtoToEntity(
+      billing,
+      BillingEntity,
+    );
+
+    billEntitiy.user = user;
+
+    const saved_data = await this.userRepository.save(billEntitiy);
+    return saved_data ? saved_data.id : -1;
   }
 
-  async Get_All_Billing_Payment(): Promise<any> {
-    return [
-      { name: "medicine", amount: "2000" },
-      { name: "visit", amount: "1500" },
-    ];
+  async Get_All_Billing_Payment(email: string): Promise<BillingEntity[]> {
+    const user = await this.userRepository.findOneBy({ email: email });
+    return this.billingRepository.findBy({ user: user });
   }
 
-  async Create_Feedback(): Promise<any> {
-    return { message: "Very Good" };
+  async Create_Feedback(email: string, feedback: FeedbackDTO): Promise<any> {
+    const user = await this.userRepository.findOneBy({ email: email });
+    const feedbackEntity = await this.mapperService.dtoToEntity(
+      feedback,
+      FeedbackEntity,
+    );
+
+    feedbackEntity.user = user;
+
+    const saved_data = await this.userRepository.save(feedbackEntity);
+    return saved_data ? saved_data.id : -1;
   }
 
   async Update_Password(): Promise<any> {
@@ -241,20 +387,45 @@ export class PatientService {
   }
 
   async Login(login_info: LoginDTO): Promise<UserEntity> {
-    return this.userRepository.findOneBy({ email: login_info.email });
-  }
-
-  async Logout(): Promise<any> {
-    return true;
+    try {
+      const user = await this.userRepository.findOneBy({
+        email: login_info.email,
+      });
+      if (user != null) {
+        return user;
+      } else {
+        throw new NotFoundException("There is no user using this email");
+      }
+    } catch (e) {
+      throw new InternalServerErrorException(e.message);
+    }
   }
 
   //   Additional Services || Not Features
-  async IsUser(): Promise<any> {
-    return true;
+  async addToBlacklist(
+    token: string,
+    date_time: string,
+    email: string,
+  ): Promise<any> {
+    try {
+      const user = await this.userRepository.findOneBy({ email: email });
+      const session = new SessionEntity();
+      session.jwt_token = token;
+      session.expiration_date = date_time;
+      session.user = user;
+      const saved_data = await this.sessionRepository.save(session);
+      return saved_data.id > 0;
+    } catch (e) {
+      throw new InternalServerErrorException(e.message);
+    }
   }
 
-  async Generate_JWT(user_info: UserEntity): Promise<any> {
-    // return await this.jwtService.signAsync({ id: user_info.id });
+  async get_token_by_token(token: string): Promise<SessionEntity> {
+    try {
+      return await this.sessionRepository.findOneBy({ jwt_token: token });
+    } catch (e) {
+      throw new InternalServerErrorException(e.message);
+    }
   }
 
   async Generate_OTP(): Promise<any> {

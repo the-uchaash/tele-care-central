@@ -4,6 +4,7 @@ import { JwtModule } from "@nestjs/jwt";
 import { AuthController } from "./auth.controller";
 import { jwtConstants } from "./constants";
 import { PatientModule } from "../patient.module";
+import { TokenBlacklistService } from "./token_blacklist.service";
 
 @Module({
   imports: [
@@ -14,7 +15,7 @@ import { PatientModule } from "../patient.module";
       signOptions: { expiresIn: "30m" },
     }),
   ],
-  providers: [AuthService],
+  providers: [AuthService, TokenBlacklistService],
   controllers: [AuthController],
   exports: [AuthService],
 })

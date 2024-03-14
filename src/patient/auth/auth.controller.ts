@@ -9,50 +9,19 @@ import {
   BadRequestException,
   HttpStatus,
   Get,
+  Request,
+  InternalServerErrorException,
+  UseGuards,
 } from "@nestjs/common";
 import { AuthService } from "./auth.service";
 // import { FileInterceptor } from "@nestjs/platform-express";
 // import { MulterError, diskStorage } from "multer";
 import * as bcrypt from "bcrypt";
 import { LoginDTO } from "../patient.dto";
+import { AuthGuard } from "./auth.guard";
 @Controller("api/patient/auth")
 export class AuthController {
   constructor(private authService: AuthService) {}
-
-  // @Post("register")
-  // @UseInterceptors(
-  //   FileInterceptor("myfile", {
-  //     fileFilter: (req, file, cb) => {
-  //       if (file.originalname.match(/^.*\.(jpg|webp|png|jpeg)$/))
-  //         cb(null, true);
-  //       else {
-  //         cb(new MulterError("LIMIT_UNEXPECTED_FILE", "image"), false);
-  //       }
-  //     },
-  //     limits: { fileSize: 30000 },
-  //     storage: diskStorage({
-  //       destination: "./upload",
-  //       filename: function (req, file, cb) {
-  //         cb(null, Date.now() + file.originalname);
-  //       },
-  //     }),
-  //   }),
-  // )
-  // @UsePipes(new ValidationPipe())
-  // async addUser(
-  //   @Body() myobj: LoginDTO,
-  //   // @UploadedFile() myfile: Express.Multer.File,
-  // ): Promise<LoginDTO> {
-  //   const salt = await bcrypt.genSalt();
-  //   const hashedpassword = await bcrypt.hash(myobj.password, salt);
-  //   myobj.password = hashedpassword;
-  //   // myobj.filename = myfile.filename;
-  //   return this.authService.signUp(myobj);
-  // }
-  // @Post("login")
-  // signIn(@Body() logindata: LoginDTO) {
-  //   return this.authService.signIn(logindata);
-  // }
 
   @Get("/index")
   // @UseGuards(SessionGuard)
@@ -89,5 +58,23 @@ export class AuthController {
   @UsePipes(new ValidationPipe())
   async Login(@Body() login_info: LoginDTO): Promise<any> {
     return await this.authService.signIn(login_info);
+  }
+
+  @Get("/logout")
+  @UseGuards(AuthGuard)
+  @UsePipes(new ValidationPipe())
+  async Logout(@Request() req): Promise<any> {
+    try {
+      const token = await this.authService.extractTokenFromHeader(req);
+      if (token != null && token != "") {
+        return await this.authService.logout(req.user.email, token);
+      } else {
+        throw new BadRequestException(
+          "Please provide the token inside header, along with the request",
+        );
+      }
+    } catch (e) {
+      throw new InternalServerErrorException(e.message);
+    }
   }
 }

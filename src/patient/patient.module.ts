@@ -15,6 +15,7 @@ import {
 } from "./patient.entity";
 import { MapperService } from "./mapper.service";
 import { JwtModule, JwtService } from "@nestjs/jwt";
+import { TokenBlacklistService } from "./auth/token_blacklist.service";
 
 @Module({
   imports: [
@@ -36,7 +37,7 @@ import { JwtModule, JwtService } from "@nestjs/jwt";
     }),
   ],
   controllers: [PatientController],
-  providers: [PatientService, MapperService, JwtService],
+  providers: [PatientService, MapperService, JwtService, TokenBlacklistService],
   exports: [PatientService], // If you don't add this, it will provide an error
 })
 export class PatientModule {}

@@ -147,3 +147,69 @@ export class Patient_ProfileDTO {
   @Min(1, { message: "User id must be at least 1" })
   user_id: number;
 }
+
+export class AppointmentDTO {
+  // Id
+  @IsNotEmpty({ message: "ID cannot be empty or null" })
+  id: number;
+
+  // Appointment Date
+  @IsNotEmpty({ message: "Appointment Date cannot be empty or null" })
+  appointment_date: string;
+
+  // Appointment Time
+  @IsNotEmpty({ message: "Appointment Time cannot be empty or null" })
+  appointment_time: string;
+
+  // Status
+  @IsNotEmpty({ message: "Status cannot be empty or null" })
+  status: string;
+
+  // Patient id
+  @IsNotEmpty({ message: "Patient id cannot be empty or null" })
+  patient_id: number;
+}
+
+export class BillingDTO {
+  // Id
+  @IsNotEmpty({ message: "ID cannot be empty or null" })
+  id: number;
+
+  // Appointment Date
+  @IsNotEmpty({ message: "Payment Amount cannot be empty or null" })
+  amount: string;
+
+  // Appointment Time
+  @IsNotEmpty({ message: "Payment Date cannot be empty or null" })
+  payment_date: string;
+
+  // Status
+  @IsNotEmpty({ message: "Status cannot be empty or null" })
+  status: string;
+
+  // Patient id
+  @IsNotEmpty({ message: "user id cannot be empty or null" })
+  user_id: number;
+}
+
+export class FeedbackDTO {
+  // Id
+  @IsNotEmpty({ message: "ID cannot be empty or null" })
+  id: number;
+
+  // Appointment Date
+  @IsNotEmpty({ message: "Feedback name cannot be empty or null" })
+  test_name: string;
+
+  // Appointment Time
+  @IsNotEmpty({ message: "Feedback text cannot be empty or null" })
+  feedback_text: string;
+
+  // Status
+  @IsNotEmpty({ message: "Status cannot be empty or null" })
+  feedback_date: string;
+
+  // Patient id
+  @IsNotEmpty({ message: "user id cannot be empty or null" })
+  user_id: number;
+}
