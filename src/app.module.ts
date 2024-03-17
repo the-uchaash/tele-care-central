@@ -4,7 +4,7 @@ import { AppService } from "./app.service";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { ConfigModule } from "@nestjs/config";
 import { PatientModule } from "./patient/patient.module";
-// import { MailerModule } from "@nestjs-modules/mailer";
+import { MailerModule } from "@nestjs-modules/mailer";
 import { AuthModule } from "./patient/auth/auth.module";
 
 @Module({
@@ -24,18 +24,18 @@ import { AuthModule } from "./patient/auth/auth.module";
       synchronize: true,
     }),
 
-    // MailerModule.forRoot({
-    //   transport: {
-    //     host: process.env.MAILER_HOST,  // Host like gmail, outlook who provides the service of SMTP
-    //     port: parseInt(process.env.MAILER_PORT, 10),
-    //     ignoreTLS: true,
-    //     secure: true,
-    //     auth: {
-    //       user: process.env.MAILER_USER, // your-SMTP-mail-id-here
-    //       pass: process.env.MAILER_PASSWORD, // your-SMTP-mail-password-here
-    //     },
-    //   },
-    // }),
+    MailerModule.forRoot({
+      transport: {
+        host: process.env.MAILER_HOST, // Host like gmail, outlook who provides the service of SMTP
+        port: parseInt(process.env.MAILER_PORT, 10),
+        ignoreTLS: true,
+        secure: true,
+        auth: {
+          user: process.env.MAILER_USER, // your-SMTP-mail-id-here
+          pass: process.env.MAILER_PASSWORD, // your-SMTP-mail-password-here
+        },
+      },
+    }),
   ],
 
   controllers: [AppController],

@@ -201,7 +201,7 @@ export class OtpEntity {
   @Column()
   otp: string;
 
-  @Column()
+  @Column({ nullable: true })
   expiration_date: string;
 
   @ManyToOne(() => UserEntity, (user) => user.otp)

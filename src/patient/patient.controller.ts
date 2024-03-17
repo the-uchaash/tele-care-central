@@ -18,12 +18,15 @@ import {
   UseInterceptors,
   UploadedFile,
   Res,
+  HttpCode,
 } from "@nestjs/common";
 import { PatientService } from "./patient.service";
 import {
   AppointmentDTO,
   BillingDTO,
   FeedbackDTO,
+  ForgetPasswordDTO,
+  OTP_ReceiverDTO,
   Patient_ProfileDTO,
   PatientDTO,
 } from "./patient.dto";
@@ -44,12 +47,14 @@ export class PatientController {
   @Get("/index")
   @UseGuards(AuthGuard)
   @UsePipes(new ValidationPipe())
+  @HttpCode(HttpStatus.OK) // Set the status code to 200 (OK)
   getIndex(): any {
     return "Relax! Patient is Alive.";
   }
   @Get("/patient_service")
   @UseGuards(AuthGuard)
   @UsePipes(new ValidationPipe())
+  @HttpCode(HttpStatus.OK) // Set the status code to 200 (OK)
   getService(): any {
     return this.patientService.get_service();
   }
@@ -59,6 +64,7 @@ export class PatientController {
   //   #1
   @Post("/signup/patient_details")
   @UsePipes(new ValidationPipe())
+  @HttpCode(HttpStatus.OK) // Set the status code to 200 (OK)
   async Patient_Details_Create(@Body() patient_info: PatientDTO): Promise<any> {
     try {
       const saved_patient =
@@ -81,6 +87,7 @@ export class PatientController {
   //   #2
   @Get("/profile")
   @UseGuards(AuthGuard)
+  @HttpCode(HttpStatus.OK) // Set the status code to 200 (OK)
   async View_own_Profile(@Request() req): Promise<any> {
     try {
       return await this.patientService.Find_Patient_By_Email(req.user.email);
@@ -93,6 +100,7 @@ export class PatientController {
   @Put("/profile/update")
   @UseGuards(AuthGuard)
   @UsePipes(new ValidationPipe())
+  @HttpCode(HttpStatus.OK) // Set the status code to 200 (OK)
   async Update_own_Profile(
     @Request() req,
     @Body() updated_data: Patient_ProfileDTO,
@@ -111,6 +119,7 @@ export class PatientController {
   @Post("/appointment/create")
   @UseGuards(AuthGuard)
   @UsePipes(new ValidationPipe())
+  @HttpCode(HttpStatus.OK) // Set the status code to 200 (OK)
   async Create_an_Appointment(
     @Request() req,
     @Body() appointment_info: AppointmentDTO,
@@ -139,6 +148,7 @@ export class PatientController {
   @Get("/appointment")
   @UseGuards(AuthGuard)
   @UsePipes(new ValidationPipe())
+  @HttpCode(HttpStatus.OK) // Set the status code to 200 (OK)
   async Upcoming_Appointment(@Request() req): Promise<any> {
     try {
       const data = this.patientService.Get_Single_Appointment(req.user.email);
@@ -158,6 +168,7 @@ export class PatientController {
   @Put("/appointment/update")
   @UseGuards(AuthGuard)
   @UsePipes(new ValidationPipe())
+  @HttpCode(HttpStatus.OK) // Set the status code to 200 (OK)
   async Update_Appointment(@Body() updated_data: AppointmentDTO): Promise<any> {
     try {
       return await this.patientService.Update_Appointment_Details(updated_data);
@@ -167,6 +178,8 @@ export class PatientController {
   }
 
   @Delete("/appointment/delete/:id")
+  @UseGuards(AuthGuard)
+  @HttpCode(HttpStatus.OK) // Set the status code to 200 (OK)
   async Delete_Appointment(
     @Param("id", ParseIntPipe) id: number,
   ): Promise<any> {
@@ -195,6 +208,7 @@ export class PatientController {
   @Get("medical_record/list")
   @UseGuards(AuthGuard)
   @UsePipes(new ValidationPipe())
+  @HttpCode(HttpStatus.OK) // Set the status code to 200 (OK)
   async Get_All_Medical_Record_List(@Request() req): Promise<any> {
     try {
       const med_rec_list = this.patientService.Get_All_Medical_Lab_Record_List(
@@ -212,6 +226,8 @@ export class PatientController {
   }
 
   @Get("medical_record/:id")
+  @UseGuards(AuthGuard)
+  @HttpCode(HttpStatus.OK) // Set the status code to 200 (OK)
   async Get_Selected_Lab_Report(
     @Param("id", ParseIntPipe) id: number,
   ): Promise<any> {
@@ -240,6 +256,7 @@ export class PatientController {
   // # : Upload & Update Seller Image
   @Put("/profile/upload")
   @UseGuards(AuthGuard)
+  @HttpCode(HttpStatus.OK) // Set the status code to 200 (OK)
   @UseInterceptors(
     FileInterceptor("myfile", {
       fileFilter: (req, file, cb) => {
@@ -285,6 +302,7 @@ export class PatientController {
 
   @Get("/profile/view_profile_image")
   @UseGuards(AuthGuard)
+  @HttpCode(HttpStatus.OK) // Set the status code to 200 (OK)
   async getSellerImages(@Request() req, @Res() res): Promise<any> {
     try {
       return this.patientService.Get_Profile_Picture(req.user.email, res);
@@ -296,6 +314,7 @@ export class PatientController {
   @Post("/payment/create")
   @UseGuards(AuthGuard)
   @UsePipes(new ValidationPipe())
+  @HttpCode(HttpStatus.OK) // Set the status code to 200 (OK)
   async Create_Billing(@Request() req, bill: BillingDTO): Promise<any> {
     try {
       const decision = await this.patientService.Create_Billing_Payment(
@@ -318,6 +337,7 @@ export class PatientController {
   @Get("payment/list")
   @UseGuards(AuthGuard)
   @UsePipes(new ValidationPipe())
+  @HttpCode(HttpStatus.OK) // Set the status code to 200 (OK)
   async Get_All_Billing(@Request() req): Promise<any> {
     try {
       const payment_list = this.patientService.Get_All_Billing_Payment(
@@ -337,6 +357,7 @@ export class PatientController {
   @Post("/feedback/create")
   @UseGuards(AuthGuard)
   @UsePipes(new ValidationPipe())
+  @HttpCode(HttpStatus.OK) // Set the status code to 200 (OK)
   async Create_Feedback(@Request() req, feedback: FeedbackDTO): Promise<any> {
     try {
       const decision = await this.patientService.Create_Feedback(
@@ -351,6 +372,45 @@ export class PatientController {
       }
     } catch (e) {
       throw new InternalServerErrorException(e.message);
+    }
+  }
+
+  @Post("/forget_password")
+  @UsePipes(new ValidationPipe())
+  @HttpCode(HttpStatus.OK) // Set the status code to 200 (OK)
+  async Forget_Password(
+    @Body() forgetPassword_DTO: ForgetPasswordDTO,
+  ): Promise<any> {
+    try {
+      return await this.patientService.ForgetPassword(forgetPassword_DTO.email);
+    } catch (e) {
+      throw new InternalServerErrorException(e.message);
+    }
+  }
+
+  @Post("/otp")
+  @UsePipes(new ValidationPipe())
+  @HttpCode(HttpStatus.OK) // Set the status code to 200 (OK)
+  async OTP_Verification(
+    @Request() req,
+    @Body() OTP_Object: OTP_ReceiverDTO,
+  ): Promise<any> {
+    try {
+      console.log("User provided otp = " + OTP_Object.otp);
+      const deicision = await this.patientService.otp_verification(
+        req,
+        OTP_Object.otp,
+      );
+      if (deicision) {
+        return {
+          success: true,
+          message: "OTP verification successful",
+        };
+      } else {
+        return new BadRequestException("OTP did not matched!");
+      }
+    } catch (e) {
+      // throw new InternalServerErrorException(e.message);
     }
   }
 }

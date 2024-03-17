@@ -56,8 +56,42 @@ export class AuthService {
     }
   }
 
+  async UpdatePassword(req: Request, password: string): Promise<any> {
+    try {
+      await this.patientService.Update_Password(req, password);
+    } catch (e) {
+      throw new InternalServerErrorException(
+        "Update Password Auth Service error = " + e.message,
+      );
+    }
+  }
+
   extractTokenFromHeader(request: Request): string | undefined {
     const [type, token] = request.headers.authorization?.split(" ") ?? [];
     return type === "Bearer" ? token : undefined;
+  }
+
+  async destroy_temporary_JWT(req: Request): Promise<any> {
+    try {
+      const token = await this.extractTokenFromHeader(req);
+
+      const user = await this.patientService.get_user_from_Request(req);
+
+      // Blacklist the token
+      const decision = await this.tokenBlacklistService.addToBlacklist(
+        user.email,
+        token,
+      );
+
+      if (decision != null) {
+        return decision;
+      } else {
+        throw new InternalServerErrorException(
+          "Problem in Token Blacklist Service",
+        );
+      }
+    } catch (e) {
+      throw new InternalServerErrorException(e.message);
+    }
   }
 }

@@ -12,12 +12,13 @@ import {
   Request,
   InternalServerErrorException,
   UseGuards,
+  HttpCode,
 } from "@nestjs/common";
 import { AuthService } from "./auth.service";
 // import { FileInterceptor } from "@nestjs/platform-express";
 // import { MulterError, diskStorage } from "multer";
 import * as bcrypt from "bcrypt";
-import { LoginDTO } from "../patient.dto";
+import { LoginDTO, New_PasswordDTO } from "../patient.dto";
 import { AuthGuard } from "./auth.guard";
 @Controller("api/patient/auth")
 export class AuthController {
@@ -26,12 +27,14 @@ export class AuthController {
   @Get("/index")
   // @UseGuards(SessionGuard)
   // @UsePipes(new ValidationPipe())
+  @HttpCode(HttpStatus.OK) // Set the status code to 200 (OK)
   getIndex(): any {
     return "Relax! Patient Auth is working.";
   }
 
   @Post("/signup")
   // @UsePipes(new ValidationPipe())
+  @HttpCode(HttpStatus.OK) // Set the status code to 200 (OK)
   async Signup(@Body() signup_info: LoginDTO): Promise<any> {
     try {
       const hashed_pass = await bcrypt.hash(signup_info.password, 12);
@@ -55,6 +58,7 @@ export class AuthController {
   }
 
   @Post("/login")
+  @HttpCode(HttpStatus.OK) // Set the status code to 200 (OK)
   @UsePipes(new ValidationPipe())
   async Login(@Body() login_info: LoginDTO): Promise<any> {
     return await this.authService.signIn(login_info);
@@ -75,6 +79,28 @@ export class AuthController {
       }
     } catch (e) {
       throw new InternalServerErrorException(e.message);
+    }
+  }
+
+  @Post("/change_password")
+  @UsePipes(new ValidationPipe())
+  @HttpCode(HttpStatus.OK) // Set the status code to 200 (OK)
+  async Change_password(
+    @Request() req,
+    new_Password_Object_DTO: New_PasswordDTO,
+  ): Promise<any> {
+    try {
+      const result = await this.authService.UpdatePassword(
+        req,
+        new_Password_Object_DTO.password,
+      );
+    } catch (e) {
+      throw new InternalServerErrorException(
+        "Change Password Auth Controller error = " + e.message,
+      );
+    } finally {
+      //   Destroy the JWT
+      return await this.authService.destroy_temporary_JWT(req);
     }
   }
 }

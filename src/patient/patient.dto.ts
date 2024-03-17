@@ -142,10 +142,7 @@ export class Patient_ProfileDTO {
   @IsString({ message: "Profile Image Name should be a string" })
   image: string;
 
-  // User ID
-  @IsNotEmpty({ message: "User id cannot be empty or null" })
-  @Min(1, { message: "User id must be at least 1" })
-  user_id: number;
+
 }
 
 export class AppointmentDTO {
@@ -212,4 +209,30 @@ export class FeedbackDTO {
   // Patient id
   @IsNotEmpty({ message: "user id cannot be empty or null" })
   user_id: number;
+}
+
+export class ForgetPasswordDTO {
+  // Email
+  @IsNotEmpty({ message: "Email cannot be empty or null" })
+  email: string;
+}
+
+export class OTP_ReceiverDTO {
+  // OTP
+  @IsNotEmpty({ message: "OTP cannot be empty or null" })
+  otp: string;
+}
+
+export class New_PasswordDTO {
+  // Password
+  @IsNotEmpty({ message: "Password cannot be empty or null" })
+  @IsString({ message: "Password should be a string" })
+  @Matches(
+    /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*()_+])[0-9a-zA-Z!@#$%^&*()_+]{8,}$/,
+    {
+      message:
+        "Password should contain at least one uppercase letter, one lowercase letter, one number, and one special character, and is at least 8 characters long.",
+    },
+  )
+  password: string;
 }

@@ -32,7 +32,7 @@ import { TokenBlacklistService } from "./auth/token_blacklist.service";
     ]),
     JwtModule.register({
       global: true,
-      secret: "3NP_Backend_Admin",
+      secret: "mySecretKey123!@#",
       signOptions: { expiresIn: "30m" },
     }),
   ],

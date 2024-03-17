@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Injectable,
   InternalServerErrorException,
   NotFoundException,
@@ -16,7 +17,6 @@ import {
   UserEntity,
 } from "./patient.entity";
 import { MoreThanOrEqual, Repository } from "typeorm";
-// import { MailerService } from "@nestjs-modules/mailer";
 import {
   AppointmentDTO,
   BillingDTO,
@@ -27,6 +27,8 @@ import {
 } from "./patient.dto";
 import { MapperService } from "./mapper.service";
 import { JwtService } from "@nestjs/jwt";
+import { MailerService } from "@nestjs-modules/mailer";
+import { classToPlain, instanceToPlain } from "class-transformer";
 import { Request } from "express";
 
 @Injectable()
@@ -51,7 +53,7 @@ export class PatientService {
     @InjectRepository(OtpEntity)
     private otpRepository: Repository<OtpEntity>,
 
-    // private mailerService: MailerService,
+    private mailerService: MailerService,
     private mapperService: MapperService,
     private jwtService: JwtService,
   ) {}
@@ -123,7 +125,7 @@ export class PatientService {
         updated_data.email != null &&
         updated_data.email != ""
       ) {
-        await this.userRepository.update(previous_data.id, {
+        await this.userRepository.update(previous_user.id, {
           email: updated_data.email,
         });
       }
@@ -378,8 +380,18 @@ export class PatientService {
     return saved_data ? saved_data.id : -1;
   }
 
-  async Update_Password(): Promise<any> {
-    return true;
+  async Update_Password(req: Request, password: string): Promise<any> {
+    try {
+      const user = await this.get_user_from_Request(req);
+      const update = await this.userRepository.update(user.id, {
+        password: password,
+      });
+      return update.affected;
+    } catch (e) {
+      throw new InternalServerErrorException(
+        "Update Password Patient Service error = " + e.message,
+      );
+    }
   }
 
   async Otp_by_Email(): Promise<any> {
@@ -420,7 +432,7 @@ export class PatientService {
     }
   }
 
-  async get_token_by_token(token: string): Promise<SessionEntity> {
+  async get_token_by_token(token: string): Promise<any> {
     try {
       return await this.sessionRepository.findOneBy({ jwt_token: token });
     } catch (e) {
@@ -428,7 +440,134 @@ export class PatientService {
     }
   }
 
+  async ForgetPassword(email: string) {
+    try {
+      const user = await this.userRepository.findOneBy({ email: email });
+      if (user != null) {
+        //   Generate OTP
+        const OTP = await this.Generate_OTP();
+        const user_has_pin = await this.otpRepository.findOneBy({ user: user });
+        if (user_has_pin) {
+          console.log("Okay, Already have OTP. Needs to be updated");
+          await this.otpRepository.update(user_has_pin.id, { otp: OTP });
+          const user_has_pin_updated = await this.otpRepository.findOneBy({
+            user: user,
+          });
+          console.log("Updated OTP = " + user_has_pin_updated.otp);
+        } else {
+          const new_otp = new OtpEntity();
+          new_otp.id = -1;
+          new_otp.otp = OTP;
+          new_otp.user = user;
+          const saved_data = await this.otpRepository.save(new_otp);
+          console.log("New OTP = " + saved_data.otp);
+        }
+
+        //   Send the OTP through email
+        const body =
+          (await process.env.EMAIL_BODY_P1) + OTP + process.env.EMAIL_BODY_P2;
+        await this.Send_Email(email, process.env.EMAIL_SUBJECT, body);
+        const new_token = await new LoginDTO();
+        new_token.email = email;
+        new_token.password = "temp";
+        return await this.create_token(new_token);
+      } else {
+        return false;
+      }
+    } catch (e) {
+      throw new InternalServerErrorException(
+        "Forget Password Service Error = " + e.message,
+      );
+    }
+  }
+
+  async create_token(payload: LoginDTO): Promise<any> {
+    try {
+      const payloadObject = instanceToPlain(payload);
+      return {
+        access_token: await this.jwtService.signAsync(payloadObject, {
+          secret: process.env.JWT_CUSTOM_SECRET, // Provide the same secret key used for OTP verification
+        }),
+      };
+    } catch (e) {
+      throw new InternalServerErrorException(
+        "Create Token Service Error = " + e.message,
+      );
+    }
+  }
+
+  async otp_verification(req: Request, otp: string): Promise<any> {
+    try {
+      // Get the user by the email
+      const user = await this.get_user_from_Request(req);
+      console.log("Got the user" + user.email);
+      //   Get the saved otp for the user
+      const saved_otp_row_for_user = await this.otpRepository.findOneBy({
+        user: user,
+      });
+
+      return saved_otp_row_for_user.otp == otp;
+    } catch (e) {
+      throw new InternalServerErrorException(
+        "OTP verification service error = " + e.message,
+      );
+    }
+  }
+
+  async decode_token(token: string): Promise<any> {
+    try {
+      const decoded = await this.jwtService.verifyAsync(token, {
+        secret: process.env.JWT_CUSTOM_SECRET,
+      });
+      return decoded;
+    } catch (error) {
+      // Handle decoding error
+      throw new Error("Failed to decode token");
+    }
+  }
+  async Send_Email(
+    emailTo: string,
+    emailSubject: string,
+    emailBody: string,
+  ): Promise<any> {
+    try {
+      return await this.mailerService.sendMail({
+        to: emailTo,
+        subject: emailSubject,
+        text: emailBody,
+      });
+    } catch (e) {
+      throw new InternalServerErrorException(e.message);
+    }
+  }
+
   async Generate_OTP(): Promise<any> {
-    return "123456";
+    return (Math.floor(Math.random() * 900000) + 100000).toString();
+  }
+
+  private extractTokenFromHeader(request: Request): string | undefined {
+    try {
+      const [type, token] = request.headers.authorization?.split(" ") ?? [];
+      return type === "Bearer" ? token : undefined;
+    } catch (e) {
+      throw new InternalServerErrorException(
+        "extract Token From Header patient service error = " + e.message,
+      );
+    }
+  }
+
+  async get_user_from_Request(req: Request): Promise<UserEntity> {
+    try {
+      const token = await this.extractTokenFromHeader(req);
+      const decoded_object_login_dto = await this.decode_token(token);
+      // Get the user by the email
+      return await this.userRepository.findOneBy({
+        email: decoded_object_login_dto.email,
+      });
+    } catch (e) {
+      throw new InternalServerErrorException(
+        "Get user from request patient service error = " + e.message,
+      );
+    }
   }
 }

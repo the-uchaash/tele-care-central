@@ -376,6 +376,323 @@
 				}
 			},
 			"response": []
+		},
+		{
+			"name": "Book an Appointment",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InRlc3QyQGdtYWlsLmNvbSIsInBhc3N3b3JkIjoiMHRlc3RQYXNzQCIsImlhdCI6MTcxMDM1OTQyOCwiZXhwIjoxNzEwMzYxMjI4fQ.Il5Eo63ggU6M2cYlnoBL9XJeITVACZlRjbKxhis7uZY",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"id\": -1,\r\n    \"appointment_date\":\"14/3/2024\",\r\n    \"appointment_time\":\"13:00\",\r\n    \"status\":\"pending\",\r\n    \"patient_id\": 7\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:3000/api/patient/appointment/create",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"api",
+						"patient",
+						"appointment",
+						"create"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Upcoming Appointment",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InRlc3QyQGdtYWlsLmNvbSIsInBhc3N3b3JkIjoiMHRlc3RQYXNzQCIsImlhdCI6MTcxMDM1OTQyOCwiZXhwIjoxNzEwMzYxMjI4fQ.Il5Eo63ggU6M2cYlnoBL9XJeITVACZlRjbKxhis7uZY",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:3000/api/patient/appointment",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"api",
+						"patient",
+						"appointment"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Show All Medical Record List",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InRlc3QyQGdtYWlsLmNvbSIsInBhc3N3b3JkIjoiMHRlc3RQYXNzQCIsImlhdCI6MTcxMDQyNTQwMywiZXhwIjoxNzEwNDI3MjAzfQ.cMpLForz7s14gzsfFKqzAH0PSO4dvCkj9M-8J3ExxDM",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:3000/api/patient/medical_record/list",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"api",
+						"patient",
+						"medical_record",
+						"list"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "View Single Medical report",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InRlc3QyQGdtYWlsLmNvbSIsInBhc3N3b3JkIjoiMHRlc3RQYXNzQCIsImlhdCI6MTcxMDQzMDQxMSwiZXhwIjoxNzEwNDMyMjExfQ.bbLSdlLHYq--ZspMAe4Gj6VIT75sId5cjGuvA_ABAM4",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:3000/api/patient/medical_record/2",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"api",
+						"patient",
+						"medical_record",
+						"2"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Upload Profile Picture",
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InRlc3QyQGdtYWlsLmNvbSIsInBhc3N3b3JkIjoiMHRlc3RQYXNzQCIsImlhdCI6MTcxMDQzNDI1MSwiZXhwIjoxNzEwNDM2MDUxfQ.bgYcnoFYHdRTOoVx5sRH4orZE4V_fyFbTDqbbei_UGM",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "myfile",
+							"type": "file",
+							"src": "/C:/Users/User/Desktop/1.png"
+						}
+					]
+				},
+				"url": {
+					"raw": "http://localhost:3000/api/patient/profile/upload",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"api",
+						"patient",
+						"profile",
+						"upload"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "View Profile Picture",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InRlc3QyQGdtYWlsLmNvbSIsInBhc3N3b3JkIjoiMHRlc3RQYXNzQCIsImlhdCI6MTcxMDQ0NzU1OCwiZXhwIjoxNzEwNDQ5MzU4fQ.Jjiu1BVg2Rmffuv47KUFu-gWTvOUbAdHKXyGsVZkIwo",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:3000/api/patient/profile/view_profile_image",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"api",
+						"patient",
+						"profile",
+						"view_profile_image"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Logout",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InRlc3QyQGdtYWlsLmNvbSIsInBhc3N3b3JkIjoiMHRlc3RQYXNzQCIsImlhdCI6MTcxMDQ0NzU1OCwiZXhwIjoxNzEwNDQ5MzU4fQ.Jjiu1BVg2Rmffuv47KUFu-gWTvOUbAdHKXyGsVZkIwo",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:3000/api/patient/auth/logout",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"api",
+						"patient",
+						"auth",
+						"logout"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Forget Password",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"email\": \"dip.kumar020@gmail.com\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:3000/api/patient/forget_password",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"api",
+						"patient",
+						"forget_password"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "OTP Verification",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImRpcC5rdW1hcjAyMEBnbWFpbC5jb20iLCJwYXNzd29yZCI6InRlbXAiLCJpYXQiOjE3MTA2MTMxNTJ9.w-qneAtyGJAFeHMQB7N9myJ-m_OPGO9Vw0WMHqqfals",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"otp\": \"811590\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:3000/api/patient/otp",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"api",
+						"patient",
+						"otp"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Update Password",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImRpcC5rdW1hcjAyMEBnbWFpbC5jb20iLCJwYXNzd29yZCI6InRlbXAiLCJpYXQiOjE3MTA2MTMxNTJ9.w-qneAtyGJAFeHMQB7N9myJ-m_OPGO9Vw0WMHqqfals",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"password\" : \"0testPass1@\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:3000/api/patient/auth/change_password",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"api",
+						"patient",
+						"auth",
+						"change_password"
+					]
+				}
+			},
+			"response": []
 		}
 	],
 	"event": [
