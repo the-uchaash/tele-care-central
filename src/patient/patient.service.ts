@@ -291,6 +291,7 @@ export class PatientService {
     email: string,
   ): Promise<MedicalLabRecordEntity[]> {
     const user = await this.userRepository.findOneBy({ email: email });
+    console.log("User = "+user.id);
     return this.medicalLabRecordRepository.findBy({ user: user });
   }
 

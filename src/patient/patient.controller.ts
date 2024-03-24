@@ -253,7 +253,7 @@ export class PatientController {
     }
   }
 
-  // # : Upload & Update Seller Image
+  // # : Upload & Update patient Image
   @Put("/profile/upload")
   @UseGuards(AuthGuard)
   @HttpCode(HttpStatus.OK) // Set the status code to 200 (OK)
@@ -286,16 +286,16 @@ export class PatientController {
         message: "Please Upload Image",
       });
     }
-    const seller = await this.patientService.Update_Profile_Picture(
+    const patient = await this.patientService.Update_Profile_Picture(
       req.user.email,
       myfileobj.filename,
     );
-    if (seller != null) {
-      return seller;
+    if (patient != null) {
+      return patient;
     } else {
       throw new NotFoundException({
         status: HttpStatus.NOT_FOUND,
-        message: "No Seller Found to Upload Seller Image",
+        message: "No patient Found to Upload patient Image",
       });
     }
   }
@@ -303,7 +303,7 @@ export class PatientController {
   @Get("/profile/view_profile_image")
   @UseGuards(AuthGuard)
   @HttpCode(HttpStatus.OK) // Set the status code to 200 (OK)
-  async getSellerImages(@Request() req, @Res() res): Promise<any> {
+  async getPatientImages(@Request() req, @Res() res): Promise<any> {
     try {
       return this.patientService.Get_Profile_Picture(req.user.email, res);
     } catch (e) {

@@ -6,15 +6,19 @@ import { ConfigModule } from "@nestjs/config";
 import { PatientModule } from "./patient/patient.module";
 import { MailerModule } from "@nestjs-modules/mailer";
 import { AuthModule } from "./patient/auth/auth.module";
+import { DoctorModule } from "./doctor/doctor/doctor.module";
+import { PharmacistModule } from "./pharmacist/pharmacist/pharmacist.module";
 
 @Module({
   imports: [
     PatientModule,
+    DoctorModule,
+    PharmacistModule,
     AuthModule,
     ConfigModule.forRoot(),
     TypeOrmModule.forRoot({
       type: "postgres",
-      url: process.env.DATABASE_URL,
+      // url: process.env.DATABASE_URL,
       host: process.env.PGHOST,
       port: parseInt(process.env.PGPORT, 10),
       username: process.env.PGUSER, // process.env => means .env file of your folder

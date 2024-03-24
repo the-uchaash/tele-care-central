@@ -39,10 +39,14 @@ export class UserEntity {
 
   @OneToMany(() => OtpEntity, (otp) => otp.user)
   otp: OtpEntity[];
+
+  @OneToMany(() => DoctorEntity, doctor => doctor.user)
+  doctors: DoctorEntity[];
 }
 
 @Entity("patient")
-export class PatientEntity {
+export class PatientEntity 
+{
   @PrimaryGeneratedColumn()
   id: number;
 
@@ -58,6 +62,9 @@ export class PatientEntity {
   @Column()
   phone: string;
 
+  @Column({ nullable: true })
+  email: string;
+
   @Column()
   gender: string;
 
@@ -67,25 +74,6 @@ export class PatientEntity {
   @OneToOne(() => UserEntity)
   @JoinColumn()
   user: UserEntity;
-}
-
-@Entity("appointment")
-export class AppointmentEntity {
-  @PrimaryGeneratedColumn()
-  id: number;
-
-  @Column()
-  appointment_date: string;
-
-  @Column()
-  appointment_time: string;
-
-  @Column()
-  status: string;
-
-  @ManyToOne(() => UserEntity, (user) => user.appointments)
-  @JoinColumn({ name: "patient_id" })
-  patient: UserEntity;
 }
 
 @Entity("doctor")
@@ -98,7 +86,117 @@ export class DoctorEntity {
 
   @Column()
   specialization: string;
+
+  @Column()
+  degree: string;
+
+  @Column()
+  experience: string;
+
+  @Column()
+  email: string;
+
+  @Column()
+  phoneNumber: string;
+
+  @Column()
+  image: string;
+
+  @ManyToOne(() => UserEntity) // Define the user relationship
+  @JoinColumn() // Add join column
+  user: UserEntity; // Define the user property
+  
+  @OneToMany(() => eServiceEntity,(eService)=>eService.doctor)
+  eServices: eServiceEntity[];
+  
 }
+
+@Entity("appointment")
+export class AppointmentEntity 
+{
+  @PrimaryGeneratedColumn()
+  id: number;
+
+  // @Column()
+  // user_id
+  // patient_id: number;
+
+  // @Column()
+  // user_id
+  // doctor_id: number;
+
+  @Column()
+  appointment_date: string;
+
+  @Column()
+  appointment_time: string;
+
+  @Column({ nullable: true })
+  disease: string;
+
+  @Column({ nullable: true }) 
+  responseTime: string;
+
+  @Column({ nullable: true }) 
+  scheduledTime: string;
+
+  @Column()
+  status: string;
+
+  @ManyToOne(() => UserEntity, (user) => user.appointments)
+  @JoinColumn({ name: "patient_id" })
+  patient: UserEntity;
+
+
+  // @ManyToOne(() => UserEntity, (user) => user.appointments)
+  // @JoinColumn({ name: "doctor_id" })
+  // doctor: UserEntity;
+  
+  @ManyToOne(() => DoctorEntity, (doctor) => doctor.id)
+  @JoinColumn({ name: "doctor_id" })
+  doctor: DoctorEntity;
+}
+
+
+
+
+
+
+@Entity("eService")
+export class eServiceEntity 
+{
+  @PrimaryGeneratedColumn()
+  id: number;
+
+  @Column({ nullable: true })
+  requestDate: string;
+
+  @Column({ nullable: true })
+  disease: string;
+
+  @Column({ nullable: true }) 
+  description: string;
+
+  @Column({ nullable: true }) 
+  responseTime: string;
+
+  @Column({ nullable: true }) 
+  doctorDescription: string;
+
+  @Column({ nullable: true }) 
+  status: string;
+
+  @ManyToOne(() => UserEntity, (user) => user.appointments)
+  @JoinColumn({ name: "patient_id" })
+  patient: UserEntity;
+
+
+  @ManyToOne(() => DoctorEntity, (doctor) => doctor.eServices)
+  @JoinColumn({ name: "doctor_id" })
+  doctor: DoctorEntity;
+}
+
+
 
 @Entity("medical_lab_record")
 export class MedicalLabRecordEntity {
@@ -199,3 +297,6 @@ export class OtpEntity {
   @ManyToOne(() => UserEntity, (user) => user.otp)
   user: UserEntity;
 }
+
+
+
